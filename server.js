@@ -28,6 +28,9 @@ app.get('/', function (req, res) {
 })
 const breadsController = require('./controllers/breads_controller')
 app.use('/breads', breadsController)
+//bakers
+const bakersController = require('./controllers/bakers_controller.js')
+app.use('/bakers', bakersController)
 app.listen(PORT, function () {
     console.log('up and running on port ', PORT)
 })

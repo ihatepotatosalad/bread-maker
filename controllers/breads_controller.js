@@ -1,6 +1,7 @@
 const express = require('express')
 const breads = express.Router()
 const Bread = require('../models/bread.js')
+const Baker = require('../models/baker.js')
 //index
 breads.get('/', (req, res) => {
     Bread.find()
@@ -20,7 +21,12 @@ breads.get('/', (req, res) => {
 })
 // NEW
 breads.get('/new', (req, res) => {
-    res.render('new')
+    Baker.find()
+        .then(foundBakers => {
+            res.render('new', {
+                bakers: foundBakers
+            })
+        })
 })
 
 
@@ -28,6 +34,8 @@ breads.get('/new', (req, res) => {
 breads.get('/:id', (req, res) => {
     Bread.findById(req.params.id)
         .then(foundBreads => {
+            const bakedBy = foundBreads.getBakedBy()
+            console.log(bakedBy)
             res.render('show', {
                 bread: foundBreads
             })
@@ -52,8 +60,11 @@ breads.post('/', (req, res) => {
 })
 // DELETE
 breads.delete('/:indexArray', (req, res) => {
-    Bread.splice(req.params.indexArray, 1)
-    res.status(303).redirect('/breads')
+    Bread.findByIdAndDelete(req.params.indexArray)
+        .then(deletedBread => {
+            res.status(303).redirect('/breads')
+        })
+
 })
 // UPDATE
 breads.put('/:arrayIndex', (req, res) => {
@@ -62,16 +73,22 @@ breads.put('/:arrayIndex', (req, res) => {
     } else {
         req.body.hasGluten = false
     }
-    Bread[req.params.arrayIndex] = req.body
-    res.redirect(`/breads/${req.params.arrayIndex}`)
+    Bread.findByIdAndUpdate(req.params.arrayIndex, req.body, { new: true })
+        .then(updatedBread => {
+            res.redirect(`/breads/${req.params.arrayIndex}`)
+        })
+
 })
 // EDIT
-breads.get('/:indexArray/edit', (req, res) => {
-    res.render('edit', {
-        bread: Bread[req.params.indexArray],
-        index: req.params.indexArray
-    })
+breads.get('/:id/edit', (req, res) => {
+    Bread.findById(req.params.id)
+        .then(foundBread => {
+            res.render('edit', {
+                bread: foundBread
+            })
+        })
 })
+
 
 
 
